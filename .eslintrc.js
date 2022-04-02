@@ -19,7 +19,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: ['.eslintrc.js', 'src/database/migrations/*'],
   rules: {
     'class-methods-use-this': 'off',
     'no-shadow': 'off',
