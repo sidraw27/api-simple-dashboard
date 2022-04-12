@@ -22,3 +22,12 @@ services:
       POSTGRES_PASSWORD: development
     ports:
       - "127.0.0.1:5432:5432"
+
+  mq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: development
+      RABBITMQ_DEFAULT_PASS: development
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
