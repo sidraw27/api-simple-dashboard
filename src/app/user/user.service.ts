@@ -16,4 +16,8 @@ export class UserService {
 
     await this.userRepository.createUser(dto);
   }
+
+  public async generateValidateToken(email: string) {
+    return this.userRepository.generateEmailValidateToken(email);
+  }
 }

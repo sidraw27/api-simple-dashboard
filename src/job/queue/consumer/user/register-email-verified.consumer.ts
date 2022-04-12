@@ -28,7 +28,6 @@ export class RegisterEmailVerifiedConsumer {
       throw error;
     }
 
-    Logger.log(data);
     channel.ack(message);
   }
 }
