@@ -9,15 +9,20 @@ import {
 import { UserService } from './user.service';
 import { PasswordRegisterDto } from './dtos';
 import { HasRegisteredException } from './exceptions';
+import { UserFacade } from './user.facade';
 
 @Controller()
 export class UserController {
-  constructor(private readonly service: UserService) {}
+  constructor(
+    private readonly facade: UserFacade,
+    private readonly service: UserService,
+  ) {}
 
   @Post('register')
   public async register(@Body() dto: PasswordRegisterDto, @Res() res) {
     try {
       await this.service.register(dto);
+      await this.facade.sendVerifyMail(dto.email);
 
       return res.status(HttpStatus.OK).json({ data: 'ok' });
     } catch (error) {

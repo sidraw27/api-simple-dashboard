@@ -60,12 +60,10 @@ export class UserRepository {
           },
         },
       });
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        return false;
-      }
-    }
 
-    return true;
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
