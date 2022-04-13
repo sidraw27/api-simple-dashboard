@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import { PasswordRegisterDto } from './dtos';
+import { PasswordRegisterDto, EmailValidateDto } from './dtos';
 import { HasRegisteredException } from './exceptions';
 
 @Injectable()
@@ -19,5 +19,9 @@ export class UserService {
 
   public async generateValidateToken(email: string) {
     return this.userRepository.generateEmailValidateToken(email);
+  }
+
+  public validateEmail(dto: EmailValidateDto) {
+    return this.userRepository.validateEmail(dto);
   }
 }

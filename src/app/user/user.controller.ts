@@ -4,12 +4,13 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  Patch,
   Post,
   Res,
 } from '@nestjs/common';
 import { UserFacade } from './user.facade';
 import { UserService } from './user.service';
-import { PasswordRegisterDto } from './dtos';
+import { PasswordRegisterDto, EmailValidateDto } from './dtos';
 import { HasRegisteredException } from './exceptions';
 
 @Controller()
@@ -33,6 +34,17 @@ export class UserController {
 
       Logger.error(error);
       throw new HttpException('Please report.', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Patch('validate-email')
+  public async validateEmail(@Body() dto: EmailValidateDto, @Res() res) {
+    try {
+      await this.service.validateEmail(dto);
+
+      return res.status(HttpStatus.OK).json('ok');
+    } catch (error) {
+      throw new HttpException('validate failed', HttpStatus.FORBIDDEN);
     }
   }
 }

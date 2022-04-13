@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getManager, MoreThan, Repository } from 'typeorm';
+import { EntityNotFoundError, getManager, MoreThan, Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 import {
   LoginType,
@@ -10,7 +10,7 @@ import {
   UserLoginType,
   UserPassword,
 } from '../../database/entities';
-import { PasswordRegisterDto } from './dtos';
+import { PasswordRegisterDto, EmailValidateDto } from './dtos';
 import { afterMinutes } from '../util/date/date-helper';
 import { HasVerifiedException, UnreadyToSendException } from './exceptions';
 
@@ -86,6 +86,36 @@ export class UserRepository {
     });
 
     return token;
+  }
+
+  public async validateEmail(dto: EmailValidateDto) {
+    const { email: emailPo } = await this.entity.findOneOrFail({
+      relations: ['email', 'email.validateTokens'],
+      where: {
+        email: {
+          email: dto.email,
+        },
+      },
+    });
+    const { validateTokens } = emailPo;
+
+    const tokenPo = validateTokens.find(
+      (entity) =>
+        entity.token === dto.token &&
+        entity.isUsed === false &&
+        entity.expiredAt >= new Date(),
+    );
+
+    if (undefined === tokenPo) {
+      throw new EntityNotFoundError(this.emailValidateTokenEntity.target, '');
+    }
+
+    await getManager().transaction(async (manager) => {
+      emailPo.isVerify = true;
+      await manager.save(this.emailEntity.create(emailPo));
+      tokenPo.isUsed = true;
+      await manager.save(this.emailValidateTokenEntity.create(tokenPo));
+    });
   }
 
   public async isEmailRegistered(email: string): Promise<boolean> {
