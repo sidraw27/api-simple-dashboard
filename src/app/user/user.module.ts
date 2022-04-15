@@ -10,6 +10,7 @@ import {
   UserEmail,
   UserEmailValidateToken,
   UserLoginType,
+  UserOauthProvider,
   UserPassword,
 } from '../../database/entities';
 import { UserFacade } from './user.facade';
@@ -23,6 +24,7 @@ import { UserFacade } from './user.facade';
       UserEmail,
       UserEmailValidateToken,
       UserPassword,
+      UserOauthProvider,
     ]),
     RmqModule,
   ],

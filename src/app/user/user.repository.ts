@@ -4,13 +4,20 @@ import { EntityNotFoundError, getManager, MoreThan, Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 import {
   LoginType,
+  Provider,
   User,
   UserEmail,
   UserEmailValidateToken,
   UserLoginType,
+  UserOauthProvider,
   UserPassword,
 } from '../../database/entities';
-import { PasswordRegisterDto, EmailValidateDto } from './dtos';
+import {
+  isPasswordRegisterDto,
+  PasswordRegisterDto,
+  EmailValidateDto,
+  OauthRegisterDto,
+} from './dtos';
 import { afterMinutes } from '../util/date/date-helper';
 import { HasVerifiedException, UnreadyToSendException } from './exceptions';
 
@@ -27,32 +34,52 @@ export class UserRepository {
     private readonly emailValidateTokenEntity: Repository<UserEmailValidateToken>,
     @InjectRepository(UserPassword)
     private readonly passwordEntity: Repository<UserPassword>,
+    @InjectRepository(UserOauthProvider)
+    private readonly oauthProviderEntity: Repository<UserOauthProvider>,
   ) {}
 
-  public async createUser(dto: PasswordRegisterDto) {
+  public async createUser(dto: PasswordRegisterDto | OauthRegisterDto) {
     await getManager().transaction(async (manager) => {
-      const user = await manager.save(
-        this.entity.create({ name: 'Custom User' }),
-      );
+      const isPasswordRegister = isPasswordRegisterDto<OauthRegisterDto>(dto);
+
+      const name = isPasswordRegister ? 'Custom User' : dto.name;
+      const user = await manager.save(this.entity.create({ name }));
+
+      const { id: userId } = user;
+      const { email } = dto;
+
       await manager.save(
         this.loginTypeEntity.create({
-          userId: user.id,
-          type: LoginType.PASSWORD,
+          userId,
+          type: isPasswordRegister ? LoginType.PASSWORD : LoginType.OAUTH,
         }),
       );
       await manager.save(
         this.emailEntity.create({
-          userId: user.id,
-          email: dto.email,
-          isVerify: false,
+          userId,
+          email,
+          isVerify: !isPasswordRegister,
         }),
       );
-      await manager.save(
-        this.passwordEntity.create({
-          userId: user.id,
-          password: dto.password,
-        }),
-      );
+
+      if (isPasswordRegister) {
+        const { password } = dto;
+        await manager.save(
+          this.passwordEntity.create({
+            userId,
+            password,
+          }),
+        );
+      } else {
+        const { provider, providerId } = dto;
+        await manager.save(
+          this.oauthProviderEntity.create({
+            userId,
+            provider,
+            providerId,
+          }),
+        );
+      }
     });
   }
 
@@ -121,6 +148,27 @@ export class UserRepository {
   public async isEmailRegistered(email: string): Promise<boolean> {
     try {
       await this.findWithEmail(email);
+
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  public async isOauthProviderIdRegistered(
+    provider: Provider,
+    providerId: string,
+  ): Promise<boolean> {
+    try {
+      await this.entity.findOneOrFail({
+        relations: ['oauthProvider'],
+        where: {
+          oauthProvider: {
+            provider,
+            providerId,
+          },
+        },
+      });
 
       return true;
     } catch (error) {
