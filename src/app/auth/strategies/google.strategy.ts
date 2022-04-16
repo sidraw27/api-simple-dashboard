@@ -26,17 +26,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     refreshToken,
     profile: ProviderProfileDto,
   ) {
+    let user;
+
     try {
-      await this.userService.register(profile, Provider.GOOGLE);
+      user = await this.userService.register(profile, Provider.GOOGLE);
     } catch (error) {
       const hasRegistered = error instanceof HasRegisteredException;
 
       if (!hasRegistered) {
         Logger.error(error);
         throw error;
+      } else {
+        user = await this.userService.findUserByProvider(
+          Provider.GOOGLE,
+          profile.id,
+        );
       }
     }
 
-    return profile.id;
+    return user;
   }
 }

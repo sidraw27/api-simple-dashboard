@@ -26,17 +26,24 @@ export class FacebookStrategy extends PassportStrategy(Strategy) {
     refreshToken,
     profile: ProviderProfileDto,
   ) {
+    let user;
+
     try {
-      await this.userService.register(profile, Provider.FACEBOOK);
+      user = await this.userService.register(profile, Provider.FACEBOOK);
     } catch (error) {
       const hasRegistered = error instanceof HasRegisteredException;
 
       if (!hasRegistered) {
         Logger.error(error);
         throw error;
+      } else {
+        user = await this.userService.findUserByProvider(
+          Provider.FACEBOOK,
+          profile.id,
+        );
       }
     }
 
-    return profile.id;
+    return user;
   }
 }

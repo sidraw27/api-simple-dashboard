@@ -38,8 +38,10 @@ export class UserRepository {
     private readonly oauthProviderEntity: Repository<UserOauthProvider>,
   ) {}
 
-  public async createUser(dto: PasswordRegisterDto | OauthRegisterDto) {
-    await getManager().transaction(async (manager) => {
+  public async createUser(
+    dto: PasswordRegisterDto | OauthRegisterDto,
+  ): Promise<Pick<User, 'uuid' | 'name' | 'loginType'>> {
+    return getManager().transaction(async (manager) => {
       const isPasswordRegister = isPasswordRegisterDto<OauthRegisterDto>(dto);
 
       const name = isPasswordRegister ? 'Custom User' : dto.name;
@@ -48,7 +50,7 @@ export class UserRepository {
       const { id: userId } = user;
       const { email } = dto;
 
-      await manager.save(
+      user.loginType = await manager.save(
         this.loginTypeEntity.create({
           userId,
           type: isPasswordRegister ? LoginType.PASSWORD : LoginType.OAUTH,
@@ -80,6 +82,8 @@ export class UserRepository {
           }),
         );
       }
+
+      return user;
     });
   }
 
@@ -143,6 +147,68 @@ export class UserRepository {
       tokenPo.isUsed = true;
       await manager.save(this.emailValidateTokenEntity.create(tokenPo));
     });
+  }
+
+  public findUserByEmail(
+    email: string,
+  ): Promise<
+    Pick<User, 'id' | 'uuid' | 'name' | 'email' | 'password' | 'loginType'>
+  > {
+    return this.entity.findOneOrFail({
+      select: ['id', 'uuid', 'name'],
+      relations: ['email', 'password', 'loginType'],
+      where: {
+        email: {
+          email,
+        },
+      },
+    });
+  }
+
+  public findUserByUUID(
+    uuid: string,
+  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'loginType'>> {
+    return this.entity.findOneOrFail({
+      select: ['id', 'uuid', 'name'],
+      relations: ['loginType'],
+      where: {
+        uuid,
+      },
+    });
+  }
+
+  public findUserByProvider(
+    provider: Provider,
+    providerId: string,
+  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'loginType'>> {
+    return this.entity.findOneOrFail({
+      select: ['id', 'uuid', 'name'],
+      relations: ['loginType', 'oauthProvider'],
+      where: {
+        oauthProvider: {
+          provider,
+          providerId,
+        },
+      },
+    });
+  }
+
+  public async isEmailVerify(uuid: string): Promise<boolean> {
+    try {
+      await this.entity.findOneOrFail({
+        relations: ['email'],
+        where: {
+          uuid,
+          email: {
+            isVerify: true,
+          },
+        },
+      });
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   public async isEmailRegistered(email: string): Promise<boolean> {

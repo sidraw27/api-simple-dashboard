@@ -30,6 +30,6 @@ import { UserFacade } from './user.facade';
   ],
   controllers: [UserController],
   providers: [UserFacade, UserService, UserRepository],
-  exports: [UserService],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}

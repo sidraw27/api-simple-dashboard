@@ -52,10 +52,18 @@ export class UserService {
       throw new HasRegisteredException();
     }
 
-    await this.userRepository.createUser(saveDto);
+    return this.userRepository.createUser(saveDto);
   }
 
-  public async generateValidateToken(email: string) {
+  public findUserByEmail(email: string) {
+    return this.userRepository.findUserByEmail(email);
+  }
+
+  public findUserByProvider(provider: Provider, providerId: string) {
+    return this.userRepository.findUserByProvider(provider, providerId);
+  }
+
+  public generateValidateToken(email: string) {
     return this.userRepository.generateEmailValidateToken(email);
   }
 
