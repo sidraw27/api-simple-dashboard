@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from '../auth/auth.module';
 import { RmqModule } from '../../job/queue';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
@@ -26,6 +27,7 @@ import { UserFacade } from './user.facade';
       UserPassword,
       UserOauthProvider,
     ]),
+    forwardRef(() => AuthModule),
     RmqModule,
   ],
   controllers: [UserController],

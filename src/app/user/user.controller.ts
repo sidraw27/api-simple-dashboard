@@ -11,6 +11,7 @@ import {
 import { UserFacade } from './user.facade';
 import { UserService } from './user.service';
 import { PasswordRegisterDto, EmailValidateDto } from './dtos';
+import { AuthService } from '../auth/auth.service';
 import { HasRegisteredException } from './exceptions';
 
 @Controller()
@@ -18,6 +19,7 @@ export class UserController {
   constructor(
     private readonly facade: UserFacade,
     private readonly service: UserService,
+    private readonly authService: AuthService,
   ) {}
 
   @Post('register')
@@ -41,8 +43,11 @@ export class UserController {
   public async validateEmail(@Body() dto: EmailValidateDto, @Res() res) {
     try {
       await this.service.validateEmail(dto);
+      const user = await this.service.findUserByEmail(dto.email);
 
-      return res.status(HttpStatus.OK).json('ok');
+      const accessToken = await this.authService.generateAccessToken(user);
+
+      return res.status(HttpStatus.OK).json({ data: { accessToken } });
     } catch (error) {
       throw new HttpException('validate failed', HttpStatus.FORBIDDEN);
     }
