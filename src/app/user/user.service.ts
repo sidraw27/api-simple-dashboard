@@ -63,8 +63,8 @@ export class UserService {
     return this.userRepository.findUserByProvider(provider, providerId);
   }
 
-  public generateValidateToken(email: string) {
-    return this.userRepository.generateEmailValidateToken(email);
+  public generateValidateToken(uuid: string) {
+    return this.userRepository.generateEmailValidateToken(uuid);
   }
 
   public validateEmail(dto: EmailValidateDto) {

@@ -32,6 +32,6 @@ import { UserFacade } from './user.facade';
   ],
   controllers: [UserController],
   providers: [UserFacade, UserService, UserRepository],
-  exports: [UserService, UserRepository],
+  exports: [UserFacade, UserService, UserRepository],
 })
 export class UserModule {}

@@ -18,6 +18,10 @@ export class AuthService {
     return bcrypt.compare(input, hash);
   }
 
+  public decodeJwt(token: string): JwtPayloadDto {
+    return <JwtPayloadDto>this.jwtService.decode(token);
+  }
+
   public async generateAccessToken(
     user: Pick<User, 'uuid' | 'name' | 'loginType'>,
   ) {

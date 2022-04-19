@@ -87,8 +87,16 @@ export class UserRepository {
     });
   }
 
-  public async generateEmailValidateToken(email: string): Promise<string> {
-    const user = await this.findWithEmail(email);
+  public async generateEmailValidateToken(
+    uuid: string,
+  ): Promise<{ token: string; email: string }> {
+    const user = await this.entity.findOneOrFail({
+      select: ['id', 'email'],
+      relations: ['email'],
+      where: {
+        uuid,
+      },
+    });
 
     if (user.email.isVerify) {
       throw new HasVerifiedException();
@@ -116,7 +124,10 @@ export class UserRepository {
       expiredAt: afterMinutes(5),
     });
 
-    return token;
+    return {
+      token,
+      email: user.email.email,
+    };
   }
 
   public async validateEmail(dto: EmailValidateDto) {
