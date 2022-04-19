@@ -1,7 +1,7 @@
 import { IsDefined, IsEmail, Matches } from 'class-validator';
 import { Match } from '../../../decorator/validators';
 
-const passwordRegex =
+export const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[A-Za-z\d\W][^\n\s]{8,40}$/;
 
 export class PasswordRegisterDto {

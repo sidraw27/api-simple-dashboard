@@ -55,6 +55,18 @@ export class UserService {
     return this.userRepository.createUser(saveDto);
   }
 
+  public patchUserName(uuid: string, name: string) {
+    return this.userRepository.updateUser(uuid, { name: name.trim() });
+  }
+
+  public patchPassword(uuid: string, password: string) {
+    return this.userRepository.updateUser(uuid, { password });
+  }
+
+  public findUserByUUID(uuid: string) {
+    return this.userRepository.findUserByUUID(uuid);
+  }
+
   public findUserByEmail(email: string) {
     return this.userRepository.findUserByEmail(email);
   }

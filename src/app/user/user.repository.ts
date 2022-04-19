@@ -178,10 +178,10 @@ export class UserRepository {
 
   public findUserByUUID(
     uuid: string,
-  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'loginType'>> {
+  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'loginType' | 'password'>> {
     return this.entity.findOneOrFail({
       select: ['id', 'uuid', 'name'],
-      relations: ['loginType'],
+      relations: ['loginType', 'password'],
       where: {
         uuid,
       },
@@ -202,6 +202,24 @@ export class UserRepository {
         },
       },
     });
+  }
+
+  public async updateUser(
+    uuid: string,
+    values: { name?: string; password?: string },
+  ) {
+    const user = await this.findUserByUUID(uuid);
+
+    const { name, password } = values;
+
+    if (name !== undefined) {
+      user.name = name;
+    }
+    if (password !== undefined) {
+      user.password.password = password;
+    }
+
+    return this.entity.save(user);
   }
 
   public async isEmailVerify(uuid: string): Promise<boolean> {

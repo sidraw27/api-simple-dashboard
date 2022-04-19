@@ -37,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   @Validate(JwtPayloadDto)
   public async validate(
     payload: JwtPayloadDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; uuid: string }> {
     const { sub, iss, iat, uuid } = payload;
     let accessToken;
 
@@ -60,6 +60,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    return { accessToken };
+    return { accessToken, uuid };
   }
 }

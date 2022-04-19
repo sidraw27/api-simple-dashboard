@@ -4,13 +4,17 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  Patch,
   Post,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UserFacade } from './user.facade';
 import { UserService } from './user.service';
-import { PasswordRegisterDto } from './dtos';
+import { PasswordRegisterDto, UserPatchDto } from './dtos';
 import { HasRegisteredException } from './exceptions';
+import { JwtGuard } from '../auth/guards';
 
 @Controller()
 export class UserController {
@@ -33,5 +37,17 @@ export class UserController {
       Logger.error(error);
       throw new HttpException('Please report.', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @Patch(':uuid')
+  @UseGuards(JwtGuard)
+  public async patchName(@Body() dto: UserPatchDto, @Req() req, @Res() res) {
+    if (req.params.uuid !== req.user.uuid) {
+      throw new HttpException('Incorrect privilege.', HttpStatus.FORBIDDEN);
+    }
+
+    await this.facade.patchUser(req.params.uuid, dto);
+
+    return res.status(HttpStatus.OK).json({ message: 'ok' });
   }
 }
