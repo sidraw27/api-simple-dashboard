@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
 import { RmqModule } from '../../job/queue';
+import { StatisticsModule } from '../../statistics/statistics.module';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
@@ -29,6 +30,7 @@ import { UserFacade } from './user.facade';
     ]),
     forwardRef(() => AuthModule),
     RmqModule,
+    StatisticsModule,
   ],
   controllers: [UserController],
   providers: [UserFacade, UserService, UserRepository],

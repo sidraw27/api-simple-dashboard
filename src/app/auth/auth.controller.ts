@@ -20,6 +20,7 @@ import Provider = Auth.Provider;
 import { JwtPayloadDto } from './dtos/jwt-payload.dto';
 import { UserFacade } from '../user/user.facade';
 import { EmailValidateDto } from '../user/dtos';
+import { StatisticsService } from '../../statistics/statistics.service';
 
 @Controller()
 export class AuthController {
@@ -35,14 +36,17 @@ export class AuthController {
     private readonly userFacade: UserFacade,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private readonly statisticService: StatisticsService,
   ) {}
 
   @Post('')
   @UseGuards(JwtGuard)
   public async reAuth(@Req() req, @Res() res) {
     const {
-      user: { accessToken },
+      user: { accessToken, uuid },
     } = req;
+
+    await this.statisticService.recordActive(uuid);
 
     return this.setJwt(res, accessToken)
       .status(HttpStatus.OK)
@@ -53,6 +57,8 @@ export class AuthController {
   @UseGuards(LocalGuard)
   public async login(@Req() req, @Res() res) {
     const accessToken = await this.service.generateAccessToken(req.user);
+
+    await this.statisticService.recordLogin(req.user.uuid);
 
     return this.setJwt(res, accessToken)
       .status(HttpStatus.OK)
@@ -108,6 +114,8 @@ export class AuthController {
   ) {
     try {
       const accessToken = await this.service.generateAccessToken(req.user);
+
+      await this.statisticService.recordLogin(req.user.uuid);
 
       return this.setJwt(res, accessToken).redirect(
         this.configService.get('APP_URL'),
