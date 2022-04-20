@@ -204,6 +204,10 @@ export class UserRepository {
     });
   }
 
+  public getTotal(): Promise<number> {
+    return this.entity.count();
+  }
+
   public async updateUser(
     uuid: string,
     values: { name?: string; password?: string },

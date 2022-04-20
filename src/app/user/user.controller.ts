@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
   Logger,
@@ -15,13 +16,23 @@ import { UserService } from './user.service';
 import { PasswordRegisterDto, UserPatchDto } from './dtos';
 import { HasRegisteredException } from './exceptions';
 import { JwtGuard } from '../auth/guards';
+import { StatisticsService } from '../../statistics/statistics.service';
 
 @Controller()
 export class UserController {
   constructor(
     private readonly facade: UserFacade,
     private readonly service: UserService,
+    private readonly statisticsService: StatisticsService,
   ) {}
+
+  @Get('statistics')
+  @UseGuards(JwtGuard)
+  public async getStatistics(@Res() res) {
+    const statistics = await this.statisticsService.getUserStatistics();
+
+    return res.status(HttpStatus.OK).json({ data: statistics });
+  }
 
   @Post('register')
   public async register(@Body() dto: PasswordRegisterDto, @Res() res) {
