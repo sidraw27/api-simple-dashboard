@@ -12,6 +12,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiCookieAuth,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserFacade } from './user.facade';
 import { UserService } from './user.service';
 import { PasswordRegisterDto, UserPatchDto } from './dtos';
@@ -19,6 +26,7 @@ import { HasRegisteredException } from './exceptions';
 import { JwtGuard } from '../auth/guards';
 import { StatisticsService } from '../../statistics/statistics.service';
 
+@ApiTags('users')
 @Controller()
 export class UserController {
   constructor(
@@ -27,6 +35,7 @@ export class UserController {
     private readonly statisticsService: StatisticsService,
   ) {}
 
+  @ApiCookieAuth()
   @Get('statistics')
   @UseGuards(JwtGuard)
   public async getStatistics(@Res() res) {
@@ -35,6 +44,12 @@ export class UserController {
     return res.status(HttpStatus.OK).json({ data: statistics });
   }
 
+  @ApiCookieAuth()
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
   @Get('')
   @UseGuards(JwtGuard)
   public async getList(@Query() query, @Res() res) {
@@ -43,6 +58,9 @@ export class UserController {
     return res.status(HttpStatus.OK).json({ data: users });
   }
 
+  @ApiBody({
+    type: PasswordRegisterDto,
+  })
   @Post('register')
   public async register(@Body() dto: PasswordRegisterDto, @Res() res) {
     try {
@@ -59,6 +77,14 @@ export class UserController {
     }
   }
 
+  @ApiCookieAuth()
+  @ApiParam({
+    name: 'uuid',
+    type: String,
+  })
+  @ApiBody({
+    type: UserPatchDto,
+  })
   @Patch(':uuid')
   @UseGuards(JwtGuard)
   public async patchName(@Body() dto: UserPatchDto, @Req() req, @Res() res) {

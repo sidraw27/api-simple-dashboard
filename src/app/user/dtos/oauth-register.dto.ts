@@ -5,19 +5,22 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { PickType } from '@nestjs/mapped-types';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { PasswordRegisterDto } from './password-register.dto';
 import { Provider } from '../../../database/entities';
 
 export class OauthRegisterDto extends PickType(PasswordRegisterDto, ['email']) {
+  @ApiProperty()
   @IsDefined()
   @IsEnum(Provider)
   readonly provider: Provider;
 
+  @ApiProperty()
   @IsDefined()
   @IsString()
   readonly providerId: string;
 
+  @ApiProperty()
   @IsDefined()
   @IsString()
   @MinLength(1)

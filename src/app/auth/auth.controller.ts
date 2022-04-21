@@ -13,6 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ApiBody, ApiCookieAuth, ApiOAuth2, ApiTags } from '@nestjs/swagger';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { OauthGuard, LocalGuard, JwtGuard } from './guards';
@@ -22,6 +23,7 @@ import { UserFacade } from '../user/user.facade';
 import { EmailValidateDto } from '../user/dtos';
 import { StatisticsService } from '../../statistics/statistics.service';
 
+@ApiTags('auth')
 @Controller()
 export class AuthController {
   private LOGIN_COOKIE = 'jwt';
@@ -39,6 +41,7 @@ export class AuthController {
     private readonly statisticService: StatisticsService,
   ) {}
 
+  @ApiCookieAuth()
   @Post('')
   @UseGuards(JwtGuard)
   public async reAuth(@Req() req, @Res() res) {
@@ -65,6 +68,7 @@ export class AuthController {
       .json({ data: 'ok' });
   }
 
+  @ApiCookieAuth()
   @Post('resend-validate-email')
   @UseGuards(JwtGuard)
   public async resendValidateEmail(@Req() req, @Res() res) {
@@ -83,6 +87,9 @@ export class AuthController {
     return res.status(HttpStatus.OK).json({ data: 'ok' });
   }
 
+  @ApiBody({
+    type: EmailValidateDto,
+  })
   @Patch('validate-email')
   public async validateEmail(@Body() dto: EmailValidateDto, @Res() res) {
     try {
@@ -99,12 +106,14 @@ export class AuthController {
     }
   }
 
+  @ApiOAuth2(['email'])
   @Get(':provider')
   @UseGuards(OauthGuard)
   public async oauth(@Param() provider: Provider) {
     Logger.log(`${provider} login`);
   }
 
+  @ApiOAuth2(['email'])
   @Get(':provider/callback')
   @UseGuards(OauthGuard)
   public async callback(
@@ -125,6 +134,7 @@ export class AuthController {
     }
   }
 
+  @ApiCookieAuth()
   @Post('logout')
   @UseGuards(JwtGuard)
   public async logout(@Res() res) {
