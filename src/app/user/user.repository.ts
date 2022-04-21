@@ -230,11 +230,13 @@ export class UserRepository {
 
     const { name, password } = values;
 
-    if (name !== undefined) {
-      user.name = name;
-    }
     if (password !== undefined) {
       user.password.password = password;
+      return this.passwordEntity.save(user.password);
+    }
+
+    if (name !== undefined) {
+      user.name = name;
     }
 
     return this.entity.save(user);
