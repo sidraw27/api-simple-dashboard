@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { Strategy } from 'passport-google-oauth20';
@@ -35,7 +35,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
 
       if (!hasRegistered) {
         Logger.error(error);
-        throw error;
+        if (error.code === '23505') {
+          throw new HttpException('Email has registered', HttpStatus.FORBIDDEN);
+        } else {
+          throw error;
+        }
       } else {
         user = await this.userService.findUserByProvider(
           Provider.GOOGLE,
