@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { UserService } from '../../user/user.service';
 import { AuthService } from '../auth.service';
+import { HasRegisteredException } from '../../user/exceptions';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -23,6 +24,10 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     } catch (error) {
       Logger.error(error);
       throw new UnauthorizedException();
+    }
+
+    if (user.password === null) {
+      throw new HasRegisteredException();
     }
 
     const isPass = await this.authService.validatePassword(
