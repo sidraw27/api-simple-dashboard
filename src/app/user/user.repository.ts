@@ -160,6 +160,18 @@ export class UserRepository {
     });
   }
 
+  public findUserPagination(
+    take: number,
+    skip: number,
+  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'email' | 'createdAt'>[]> {
+    return this.entity.find({
+      select: ['id', 'uuid', 'name', 'createdAt'],
+      relations: ['email'],
+      take,
+      skip,
+    });
+  }
+
   public findUserByEmail(
     email: string,
   ): Promise<

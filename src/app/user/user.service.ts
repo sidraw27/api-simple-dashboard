@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 import { UserRepository } from './user.repository';
 import {
   isPasswordRegisterDto,
@@ -9,10 +11,14 @@ import {
 import { HasRegisteredException } from './exceptions';
 import { Provider } from '../../database/entities';
 import { ProviderProfileDto } from '../auth/dtos/provider-profile.dto';
+import { Key, StatisticsService } from '../../statistics/statistics.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    @InjectRedis() private redis: Redis,
+    private readonly userRepository: UserRepository,
+  ) {}
 
   public async register(dto: PasswordRegisterDto);
 
@@ -53,6 +59,38 @@ export class UserService {
     }
 
     return this.userRepository.createUser(saveDto);
+  }
+
+  public async getUsersInfo(page: number) {
+    const size = 10;
+    const skip = (page - 1) * size;
+
+    const users = await this.userRepository.findUserPagination(size, skip);
+
+    return Promise.all(
+      users.map(async (user) => {
+        const {
+          uuid,
+          name,
+          email: { email },
+        } = user;
+
+        const key = StatisticsService.getActiveKeyByDays();
+        const lastSessionTime = Number(await this.redis.zscore(key, uuid));
+        const lastSession =
+          lastSessionTime === 0 ? '-' : new Date(lastSessionTime).toUTCString();
+        const loginTimes = Number(
+          await this.redis.zscore(Key.loginTimes, uuid),
+        );
+
+        return {
+          name,
+          email,
+          lastSession,
+          loginTimes,
+        };
+      }),
+    );
   }
 
   public patchUserName(uuid: string, name: string) {

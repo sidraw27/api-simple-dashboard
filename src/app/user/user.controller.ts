@@ -7,6 +7,7 @@ import {
   Logger,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -32,6 +33,14 @@ export class UserController {
     const statistics = await this.statisticsService.getUserStatistics();
 
     return res.status(HttpStatus.OK).json({ data: statistics });
+  }
+
+  @Get('')
+  @UseGuards(JwtGuard)
+  public async getList(@Query() query, @Res() res) {
+    const users = await this.service.getUsersInfo(query.page ?? 1);
+
+    return res.status(HttpStatus.OK).json({ data: users });
   }
 
   @Post('register')

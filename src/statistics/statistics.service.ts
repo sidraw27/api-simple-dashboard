@@ -4,7 +4,7 @@ import Redis from 'ioredis';
 import { afterDays, getYmdFormatDate } from '../app/util/date/date-helper';
 import { UserRepository } from '../app/user/user.repository';
 
-const enum Key {
+export const enum Key {
   userStatistics = 'user_statistics',
   loginTimes = 'record_login_times',
   active = 'active_users_{Ymd}',
@@ -30,7 +30,7 @@ export class StatisticsService {
   }
 
   public async recordActive(uuid: string) {
-    const key = Key.active.replace('{Ymd}', getYmdFormatDate());
+    const key = StatisticsService.getActiveKeyByDays();
 
     await this.redis.zadd(key, new Date().getTime(), uuid);
   }
@@ -52,7 +52,7 @@ export class StatisticsService {
       const daysRange = Array.from({ length: days }, (_, i) => i + 1);
       // eslint-disable-next-line no-restricted-syntax,guard-for-in
       for (const day in daysRange) {
-        dayKey = Key.active.replace('{Ymd}', getYmdFormatDate(afterDays(-day)));
+        dayKey = StatisticsService.getActiveKeyByDays(-day);
         // eslint-disable-next-line no-await-in-loop
         activeUsers = Number(await this.redis.zcard(dayKey));
         if (Number(day) === 0) {
@@ -72,5 +72,9 @@ export class StatisticsService {
     }
 
     return statistics;
+  }
+
+  public static getActiveKeyByDays(days = 0) {
+    return Key.active.replace('{Ymd}', getYmdFormatDate(afterDays(days)));
   }
 }
