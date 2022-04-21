@@ -23,11 +23,12 @@ export class AuthService {
   }
 
   public async generateAccessToken(
-    user: Pick<User, 'uuid' | 'name' | 'loginType'>,
+    user: Pick<User, 'uuid' | 'name' | 'email' | 'loginType'>,
   ) {
     const {
       uuid,
       name,
+      email: { email },
       loginType: { type: loginType },
     } = user;
 
@@ -37,6 +38,7 @@ export class AuthService {
       iat: new Date().getTime(),
       uuid,
       name,
+      email,
       loginType,
       isVerify: await this.userRepository.isEmailVerify(uuid),
     };

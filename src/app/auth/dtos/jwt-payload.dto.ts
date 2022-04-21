@@ -12,6 +12,8 @@ export class JwtPayloadDto {
 
   readonly name: string;
 
+  readonly email: string;
+
   readonly loginType: LoginType;
 
   readonly isVerify: boolean;

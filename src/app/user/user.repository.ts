@@ -40,7 +40,7 @@ export class UserRepository {
 
   public async createUser(
     dto: PasswordRegisterDto | OauthRegisterDto,
-  ): Promise<Pick<User, 'uuid' | 'name' | 'loginType'>> {
+  ): Promise<Pick<User, 'uuid' | 'name' | 'email' | 'loginType'>> {
     return getManager().transaction(async (manager) => {
       const isPasswordRegister = isPasswordRegisterDto<OauthRegisterDto>(dto);
 
@@ -56,7 +56,7 @@ export class UserRepository {
           type: isPasswordRegister ? LoginType.PASSWORD : LoginType.OAUTH,
         }),
       );
-      await manager.save(
+      user.email = await manager.save(
         this.emailEntity.create({
           userId,
           email,
@@ -190,10 +190,12 @@ export class UserRepository {
 
   public findUserByUUID(
     uuid: string,
-  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'loginType' | 'password'>> {
+  ): Promise<
+    Pick<User, 'id' | 'uuid' | 'name' | 'email' | 'loginType' | 'password'>
+  > {
     return this.entity.findOneOrFail({
       select: ['id', 'uuid', 'name'],
-      relations: ['loginType', 'password'],
+      relations: ['loginType', 'email', 'password'],
       where: {
         uuid,
       },
@@ -203,10 +205,10 @@ export class UserRepository {
   public findUserByProvider(
     provider: Provider,
     providerId: string,
-  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'loginType'>> {
+  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'email' | 'loginType'>> {
     return this.entity.findOneOrFail({
       select: ['id', 'uuid', 'name'],
-      relations: ['loginType', 'oauthProvider'],
+      relations: ['loginType', 'email', 'oauthProvider'],
       where: {
         oauthProvider: {
           provider,
