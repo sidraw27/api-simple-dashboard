@@ -41,12 +41,16 @@ export class UserService {
       saveDto = dto;
       isRegistered = await this.userRepository.isEmailRegistered(saveDto.email);
     } else {
-      const { id: providerId, displayName: name, emails } = dto;
+      const {
+        id: providerId,
+        displayName: name,
+        emails: [{ value: email }],
+      } = dto;
       saveDto = <OauthRegisterDto>{
         provider,
         providerId,
         name,
-        email: emails[0].value,
+        email,
       };
       isRegistered = await this.userRepository.isOauthProviderIdRegistered(
         saveDto.provider,
