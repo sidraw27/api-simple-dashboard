@@ -5,6 +5,7 @@ import { afterDays, getYmdFormatDate } from '../app/util/date/date-helper';
 import { UserRepository } from '../app/user/user.repository';
 
 export const enum Key {
+  lastSessionTime = 'last_session_time',
   userStatistics = 'user_statistics',
   loginTimes = 'record_login_times',
   active = 'active_users_{Ymd}',
@@ -30,9 +31,10 @@ export class StatisticsService {
   }
 
   public async recordActive(uuid: string) {
-    const key = StatisticsService.getActiveKeyByDays();
+    const time = new Date().getTime();
 
-    await this.redis.zadd(key, new Date().getTime(), uuid);
+    await this.redis.zadd(StatisticsService.getActiveKeyByDays(), time, uuid);
+    await this.redis.zadd(Key.lastSessionTime, time, uuid);
   }
 
   public async getUserStatistics(): Promise<Statistics> {

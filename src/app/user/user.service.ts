@@ -11,7 +11,7 @@ import {
 import { HasRegisteredException } from './exceptions';
 import { Provider } from '../../database/entities';
 import { ProviderProfileDto } from '../auth/dtos/provider-profile.dto';
-import { Key, StatisticsService } from '../../statistics/statistics.service';
+import { Key } from '../../statistics/statistics.service';
 
 @Injectable()
 export class UserService {
@@ -79,8 +79,9 @@ export class UserService {
           email: { email },
         } = user;
 
-        const key = StatisticsService.getActiveKeyByDays();
-        const lastSessionTime = Number(await this.redis.zscore(key, uuid));
+        const lastSessionTime = Number(
+          await this.redis.zscore(Key.lastSessionTime, uuid),
+        );
         const lastSession =
           lastSessionTime === 0 ? '-' : new Date(lastSessionTime).toUTCString();
         const loginTimes = Number(
