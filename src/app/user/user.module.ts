@@ -16,6 +16,7 @@ import {
   UserPassword,
 } from '../../database/entities';
 import { UserFacade } from './user.facade';
+import { FindBuilder } from './builders';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { UserFacade } from './user.facade';
     StatisticsModule,
   ],
   controllers: [UserController],
-  providers: [UserFacade, UserService, UserRepository],
+  providers: [UserFacade, UserService, UserRepository, FindBuilder],
   exports: [UserFacade, UserService, UserRepository],
 })
 export class UserModule {}

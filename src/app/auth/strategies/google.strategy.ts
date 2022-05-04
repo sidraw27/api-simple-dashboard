@@ -41,10 +41,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
           throw error;
         }
       } else {
-        user = await this.userService.findUserByProvider(
-          Provider.GOOGLE,
-          profile.id,
-        );
+        user = await this.userService.findUser({
+          provider: Provider.GOOGLE,
+          providerId: profile.id,
+        });
       }
     }
 

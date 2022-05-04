@@ -94,7 +94,7 @@ export class AuthController {
   public async validateEmail(@Body() dto: EmailValidateDto, @Res() res) {
     try {
       await this.userService.validateEmail(dto);
-      const user = await this.userService.findUserByEmail(dto.email);
+      const user = await this.userService.findUser({ email: dto.email });
 
       const accessToken = await this.service.generateAccessToken(user);
 

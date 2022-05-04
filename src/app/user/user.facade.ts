@@ -38,7 +38,7 @@ export class UserFacade {
       'password' in dto &&
       'passwordConfirmation' in dto
     ) {
-      const user = await this.service.findUserByUUID(uuid);
+      const user = await this.service.findUser({ uuid });
 
       const isPass = await this.authService.validatePassword(
         dto.oldPassword,

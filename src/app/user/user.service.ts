@@ -12,12 +12,14 @@ import { HasRegisteredException } from './exceptions';
 import { Provider } from '../../database/entities';
 import { ProviderProfileDto } from '../auth/dtos/provider-profile.dto';
 import { Key } from '../../statistics/statistics.service';
+import { FindBuilder } from './builders';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRedis() private redis: Redis,
     private readonly userRepository: UserRepository,
+    private readonly findBuilder: FindBuilder,
   ) {}
 
   public async register(dto: PasswordRegisterDto);
@@ -106,16 +108,26 @@ export class UserService {
     return this.userRepository.updateUser(uuid, { password });
   }
 
-  public findUserByUUID(uuid: string) {
-    return this.userRepository.findUserByUUID(uuid);
-  }
+  public async findUser(query: {
+    email?: string;
+    uuid?: string;
+    provider?: Provider;
+    providerId?: string;
+  }) {
+    const { findBuilder } = this;
+    const { email, uuid, provider, providerId } = query;
 
-  public findUserByEmail(email: string) {
-    return this.userRepository.findUserByEmail(email);
-  }
+    if (email !== undefined) {
+      findBuilder.setEmail(email);
+    }
+    if (uuid !== undefined) {
+      findBuilder.setUUID(uuid);
+    }
+    if (provider !== undefined && providerId !== undefined) {
+      findBuilder.setProvider(provider, providerId);
+    }
 
-  public findUserByProvider(provider: Provider, providerId: string) {
-    return this.userRepository.findUserByProvider(provider, providerId);
+    return findBuilder.execute();
   }
 
   public generateValidateToken(uuid: string) {

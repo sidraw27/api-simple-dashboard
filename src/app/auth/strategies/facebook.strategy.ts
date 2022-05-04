@@ -38,10 +38,10 @@ export class FacebookStrategy extends PassportStrategy(Strategy) {
         Logger.error(error);
         throw error;
       } else {
-        user = await this.userService.findUserByProvider(
-          Provider.FACEBOOK,
-          profile.id,
-        );
+        user = await this.userService.findUser({
+          provider: Provider.FACEBOOK,
+          providerId: profile.id,
+        });
       }
     }
 

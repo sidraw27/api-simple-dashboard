@@ -20,7 +20,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     let user;
 
     try {
-      user = await this.userService.findUserByEmail(username);
+      user = await this.userService.findUser({ email: username });
     } catch (error) {
       Logger.error(error);
       throw new UnauthorizedException();

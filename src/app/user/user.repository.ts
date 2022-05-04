@@ -172,22 +172,6 @@ export class UserRepository {
     });
   }
 
-  public findUserByEmail(
-    email: string,
-  ): Promise<
-    Pick<User, 'id' | 'uuid' | 'name' | 'email' | 'password' | 'loginType'>
-  > {
-    return this.entity.findOneOrFail({
-      select: ['id', 'uuid', 'name'],
-      relations: ['email', 'password', 'loginType'],
-      where: {
-        email: {
-          email,
-        },
-      },
-    });
-  }
-
   public findUserByUUID(
     uuid: string,
   ): Promise<
@@ -198,22 +182,6 @@ export class UserRepository {
       relations: ['loginType', 'email', 'password'],
       where: {
         uuid,
-      },
-    });
-  }
-
-  public findUserByProvider(
-    provider: Provider,
-    providerId: string,
-  ): Promise<Pick<User, 'id' | 'uuid' | 'name' | 'email' | 'loginType'>> {
-    return this.entity.findOneOrFail({
-      select: ['id', 'uuid', 'name'],
-      relations: ['loginType', 'email', 'oauthProvider'],
-      where: {
-        oauthProvider: {
-          provider,
-          providerId,
-        },
       },
     });
   }
